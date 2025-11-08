@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
@@ -18,7 +20,10 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
-        DcMotor shooterMotor = hardwareMap.dcMotor.get("shooterMotor");
+        DcMotor shooterLeftMotor = hardwareMap.dcMotor.get("shooterLeftMotor");
+        DcMotor shooterRightMotor = hardwareMap.dcMotor.get("shooterRightMotor");
+        DcMotor indexMotor = hardwareMap.dcMotor.get("indexMotor");
+        Servo ballProtector = hardwareMap.servo.get("ballProtector");
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
@@ -74,10 +79,18 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-            if (gamepad1.right_bumper) {
-                shooterMotor.setPower(1);
+            if (gamepad2.right_bumper) {
+                shooterRightMotor.setPower(1);
             } else {
-                shooterMotor.setPower(0);
+                shooterRightMotor.setPower(0);
+            }
+
+            indexMotor.setPower(gamepad2.left_stick_y);
+
+            if (gamepad2.a) {
+                ballProtector.setPosition(.25);
+            } else if (gamepad2.b) {
+                ballProtector.setPosition(.75);
             }
         }
     }
