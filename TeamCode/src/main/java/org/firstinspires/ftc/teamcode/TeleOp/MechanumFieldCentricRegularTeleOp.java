@@ -80,17 +80,22 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             backRightMotor.setPower(backRightPower);
 
             if (gamepad2.right_bumper) {
+                shooterRightMotor.setPower(-1);
+                shooterLeftMotor.setPower(1);
+            } else if (gamepad2.left_bumper) {
                 shooterRightMotor.setPower(1);
+                shooterLeftMotor.setPower(-1);
             } else {
                 shooterRightMotor.setPower(0);
+                shooterLeftMotor.setPower(0);
             }
 
             indexMotor.setPower(gamepad2.left_stick_y);
 
             if (gamepad2.a) {
-                ballProtector.setPosition(.25);
+                ballProtector.setPosition(.5);
             } else if (gamepad2.b) {
-                ballProtector.setPosition(.75);
+                ballProtector.setPosition(.6);
             }
         }
     }
