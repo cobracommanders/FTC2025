@@ -23,7 +23,9 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
         DcMotor shooterLeftMotor = hardwareMap.dcMotor.get("shooterLeftMotor");
         DcMotor shooterRightMotor = hardwareMap.dcMotor.get("shooterRightMotor");
         DcMotor indexMotor = hardwareMap.dcMotor.get("indexMotor");
-        Servo ballProtector = hardwareMap.servo.get("ballProtector");
+        DcMotor feedWheel = hardwareMap.dcMotor.get("feedWheel");
+        //Has been taken off the robot v v v
+        // Servo ballProtector = hardwareMap.servo.get("ballProtector");
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
@@ -78,25 +80,61 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             backLeftMotor.setPower(backLeftPower);
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
-
-            if (gamepad2.right_bumper) {
-                shooterRightMotor.setPower(-1);
-                shooterLeftMotor.setPower(1);
-            } else if (gamepad2.left_bumper) {
-                shooterRightMotor.setPower(1);
-                shooterLeftMotor.setPower(-1);
+//             Original shooter settings 100% power
+//            if (gamepad2.right_bumper) {
+//                shooterRightMotor.setPower(-1);
+//                shooterLeftMotor.setPower(1);
+//            } else if (gamepad2.left_bumper) {
+//                shooterRightMotor.setPower(1);
+//                shooterLeftMotor.setPower(-1);
+//            } else {
+//                shooterRightMotor.setPower(0);
+//                shooterLeftMotor.setPower(0);
+//            }
+            // Shooter power notes here please(
+            //  )
+            // Shooter Test first start with 50% then make notes here
+            if (gamepad2.a) {
+                //switched direction so it would run correct direction
+                shooterRightMotor.setPower(0.85);
+                shooterLeftMotor.setPower(-0.85);
+            } else if (gamepad2.b) {
+                shooterRightMotor.setPower(-0.75);
+                shooterLeftMotor.setPower(0.75);
+            }else if (gamepad2.y) {
+                    //switched variables so it would run correct direction
+                    shooterRightMotor.setPower(0.95);
+                    shooterLeftMotor.setPower(-0.95);
             } else {
                 shooterRightMotor.setPower(0);
                 shooterLeftMotor.setPower(0);
-            }
+                }
+                    //below code was for index to be controlled by operator using joystick; power by joystick position
+                    // indexMotor.setPower(gamepad2.left_stick_y);
+                    if (gamepad1.right_bumper) {
+                        indexMotor.setPower(-1);
+                    } else if (gamepad1.left_bumper) {
+                        indexMotor.setPower(1);
+                    } else {
+                        indexMotor.setPower(0);
+                        //Below code is to control the roller before the shooter which we will call feedWheel for name. Open to name changes
+                        if (gamepad2.right_bumper) {
+                            feedWheel.setPower(-1);
+                        } else if (gamepad2.left_bumper) {
+                            feedWheel.setPower(1);
+                        } else {
+                            feedWheel.setPower(0);
+                        }
 
-            indexMotor.setPower(gamepad2.left_stick_y);
+                    }
+                }
+//           ballProtector is the original servo which has since been replaced with a roller before the shooter
+//            if (gamepad2.a) {
+//                ballProtector.setPosition(.5);
+//            } else if (gamepad2.b) {
+//                ballProtector.setPosition(.6);
+//            }
 
-            if (gamepad2.a) {
-                ballProtector.setPosition(.5);
-            } else if (gamepad2.b) {
-                ballProtector.setPosition(.6);
+
             }
         }
-    }
-}
