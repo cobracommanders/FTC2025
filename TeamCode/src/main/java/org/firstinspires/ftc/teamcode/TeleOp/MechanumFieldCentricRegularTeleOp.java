@@ -45,7 +45,7 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
         this.imu.initialize(parameters);
     }
 
-    private void calculateMechanumDrive(double x, double y, double rx) {
+    private void calculateMechanumDrive(double x, double y, double rx, double trigger) {
         double botHeading = this.imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // Rotate the movement direction counter to the bot's rotation
@@ -62,6 +62,12 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
         double backLeftPower = (rotY - rotX + rx) / denominator;
         double frontRightPower = (rotY - rotX - rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
+        if (trigger > 0.5){
+            frontLeftPower =  frontLeftPower*0.5;
+            backLeftPower = backLeftPower*0.5;
+            frontRightPower = frontRightPower*0.5;
+            backRightPower = backRightPower*0.5;
+        }
 
         this.frontLeftMotor.setPower(frontLeftPower);
         this.backLeftMotor.setPower(backLeftPower);
@@ -105,7 +111,8 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
-            this.calculateMechanumDrive(x, y, rx);
+            double trigger = gamepad1.left_trigger;
+            this.calculateMechanumDrive(x, y, rx, trigger);
 
             // This button choice was made so that it is hard to hit on accident,
             // it can be freely changed based on preference.
