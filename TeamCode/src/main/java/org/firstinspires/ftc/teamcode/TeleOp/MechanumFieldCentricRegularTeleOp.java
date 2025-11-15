@@ -70,8 +70,8 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
     }
 
     private void setShooterSpeed(double speed) {
-        this.shooterRightMotor.setPower(-speed);
-        this.shooterLeftMotor.setPower(speed);
+        this.shooterRightMotor.setPower(speed);
+        this.shooterLeftMotor.setPower(-speed);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
         this.frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         this.backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         this.frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
-        this.backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+        this.backRightMotor = hardwareMap.dcMotor.get("backRightMotor777");
         this.shooterLeftMotor = hardwareMap.dcMotor.get("shooterLeftMotor");
         this.shooterRightMotor = hardwareMap.dcMotor.get("shooterRightMotor");
         this.indexMotor = hardwareMap.dcMotor.get("indexMotor");
@@ -116,11 +116,13 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
 
             // button control shooter speed
             if (gamepad2.a) {
-                setShooterSpeed(0.85);
+                setShooterSpeed(0.45);
             } else if (gamepad2.b) {
-                this.setShooterSpeed(0.75);
+                this.setShooterSpeed(0.55);
             } else if (gamepad2.y) {
-                this.setShooterSpeed(0.95);
+                this.setShooterSpeed(0.65);
+            } else if (gamepad2.x) {
+                this.setShooterSpeed(0.35);
             } else {
                 this.setShooterSpeed(0);
             }
