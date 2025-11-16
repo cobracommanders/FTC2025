@@ -31,16 +31,15 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            // gets joystick values to control mechanum drivetrain
+            // Get joystick values to control mechanum drivetrain
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
             double leftTrigger = gamepad1.left_trigger;
             this.drivetrain.drive(x, y, rx, leftTrigger);
 
-            // This button choice was made so that it is hard to hit on accident,
-            // it can be freely changed based on preference.
-            // The equivalent button is start on Xbox-style controllers.
+            // Reset robot field orientation
+            // The equivalent button is start on Xbox-style controllers
             if (gamepad1.options) {
                 this.drivetrain.resetHeading();
             }

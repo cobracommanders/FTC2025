@@ -1,131 +1,197 @@
-## TeamCode Module
+# TeamCode Module - FTC 2025/2026 Season
 
-Welcome!
+This README will help you understand how our code is organized and how everything works together.
 
-This module, TeamCode, is the place where you will write/paste the code for your team's
-robot controller App. This module is currently empty (a clean slate) but the
-process for adding OpModes is straightforward.
+## 📁 Code Organization
 
-## Creating your own OpModes
-
-The easiest way to create your own OpMode is to copy a Sample OpMode and make it your own.
-
-Sample opmodes exist in the FtcRobotController module.
-To locate these samples, find the FtcRobotController module in the "Project/Android" tab.
-
-Expand the following tree elements:
- FtcRobotController/java/org.firstinspires.ftc.robotcontroller/external/samples
-
-### Naming of Samples
-
-To gain a better understanding of how the samples are organized, and how to interpret the
-naming system, it will help to understand the conventions that were used during their creation.
-
-These conventions are described (in detail) in the sample_conventions.md file in this folder.
-
-To summarize: A range of different samples classes will reside in the java/external/samples.
-The class names will follow a naming convention which indicates the purpose of each class.
-The prefix of the name will be one of the following:
-
-Basic:  	This is a minimally functional OpMode used to illustrate the skeleton/structure
-            of a particular style of OpMode.  These are bare bones examples.
-
-Sensor:    	This is a Sample OpMode that shows how to use a specific sensor.
-            It is not intended to drive a functioning robot, it is simply showing the minimal code
-            required to read and display the sensor values.
-
-Robot:	    This is a Sample OpMode that assumes a simple two-motor (differential) drive base.
-            It may be used to provide a common baseline driving OpMode, or
-            to demonstrate how a particular sensor or concept can be used to navigate.
-
-Concept:	This is a sample OpMode that illustrates performing a specific function or concept.
-            These may be complex, but their operation should be explained clearly in the comments,
-            or the comments should reference an external doc, guide or tutorial.
-            Each OpMode should try to only demonstrate a single concept so they are easy to
-            locate based on their name.  These OpModes may not produce a drivable robot.
-
-After the prefix, other conventions will apply:
-
-* Sensor class names are constructed as:    Sensor - Company - Type
-* Robot class names are constructed as:     Robot - Mode - Action - OpModetype
-* Concept class names are constructed as:   Concept - Topic - OpModetype
-
-Once you are familiar with the range of samples available, you can choose one to be the
-basis for your own robot.  In all cases, the desired sample(s) needs to be copied into
-your TeamCode module to be used.
-
-This is done inside Android Studio directly, using the following steps:
-
- 1) Locate the desired sample class in the Project/Android tree.
-
- 2) Right click on the sample class and select "Copy"
-
- 3) Expand the  TeamCode/java folder
-
- 4) Right click on the org.firstinspires.ftc.teamcode folder and select "Paste"
-
- 5) You will be prompted for a class name for the copy.
-    Choose something meaningful based on the purpose of this class.
-    Start with a capital letter, and remember that there may be more similar classes later.
-
-Once your copy has been created, you should prepare it for use on your robot.
-This is done by adjusting the OpMode's name, and enabling it to be displayed on the
-Driver Station's OpMode list.
-
-Each OpMode sample class begins with several lines of code like the ones shown below:
+Our code is organized into folders (called "packages" in Java):
 
 ```
- @TeleOp(name="Template: Linear OpMode", group="Linear Opmode")
- @Disabled
+teamcode/
+├── Common/          - Reusable robot parts (drivetrain, shooter, intake)
+├── TeleOp/          - Driver-controlled programs
+└── Auto/            - Autonomous programs (robot drives itself)
 ```
 
-The name that will appear on the driver station's "opmode list" is defined by the code:
- ``name="Template: Linear OpMode"``
-You can change what appears between the quotes to better describe your opmode.
-The "group=" portion of the code can be used to help organize your list of OpModes.
+### Common/ - Robot Subsystems
 
-As shown, the current OpMode will NOT appear on the driver station's OpMode list because of the
-  ``@Disabled`` annotation which has been included.
-This line can simply be deleted , or commented out, to make the OpMode visible.
+These are the building blocks of our robot. Each file controls one major part:
 
+- **`MechanumDrive.java`** - Controls the 4-wheel mecanum drivetrain
+  - Handles field-centric driving (joystick always points away from driver)
+  - Uses IMU (gyroscope) to know which way the robot is facing
+  - Has slow mode for precise movements
 
+- **`Shooter.java`** - Controls the shooting mechanism
+  - Two motors that spin to launch game pieces
+  - Feed wheel that pushes pieces into the shooter
+  - Different preset speeds for different distances
 
-## ADVANCED Multi-Team App management:  Cloning the TeamCode Module
+- **`Intake.java`** - Controls the intake mechanism
+  - One motor that pulls game pieces into the robot
+  - Can run forward (intake) or reverse (spit out)
 
-In some situations, you have multiple teams in your club and you want them to all share
-a common code organization, with each being able to *see* the others code but each having
-their own team module with their own code that they maintain themselves.
+### TeleOp/ - Driver Control Programs
 
-In this situation, you might wish to clone the TeamCode module, once for each of these teams.
-Each of the clones would then appear along side each other in the Android Studio module list,
-together with the FtcRobotController module (and the original TeamCode module).
+These are the programs drivers use during matches:
 
-Selective Team phones can then be programmed by selecting the desired Module from the pulldown list
-prior to clicking to the green Run arrow.
+- **`MechanumFieldCentricRegularTeleOp.java`** - Main driver control program
+  - **Gamepad 1** (Driver): Controls driving, intake, slow mode
+  - **Gamepad 2** (Operator): Controls shooter, feed wheel, intake
+  - See the file for complete button mappings
 
-Warning:  This is not for the inexperienced Software developer.
-You will need to be comfortable with File manipulations and managing Android Studio Modules.
-These changes are performed OUTSIDE of Android Studios, so close Android Studios before you do this.
- 
-Also.. Make a full project backup before you start this :)
+### Auto/ - Autonomous Programs
 
-To clone TeamCode, do the following:
+These programs run during the first 30 seconds when the robot drives itself:
 
-Note: Some names start with "Team" and others start with "team".  This is intentional.
+- **`MechanumAutonomousDriveBackwards.java`** - Simple: drive backwards for 2 seconds
+- **`MechanumAutonomousShoot.java`** - Drive backwards (shooting code in to be added)
+- **`MechanumAutonomousDriveBackwardsTurn.java`** - Experimental: drive backwards, then turn
 
-1)  Using your operating system file management tools, copy the whole "TeamCode"
-    folder to a sibling folder with a corresponding new name, eg: "Team0417".
+## 🎮 How the Code Works
 
-2)  In the new Team0417 folder, delete the TeamCode.iml file.
+### Field-Centric Driving
 
-3)  the new Team0417 folder, rename the "src/main/java/org/firstinspires/ftc/teamcode" folder
-    to a matching name with a lowercase 'team' eg:  "team0417".
+Our robot uses **field-centric control**, which means:
+- Pushing the joystick forward **always** moves away from the driver
+- This works even if the robot has spun around completely
+- Makes driving much more intuitive
 
-4)  In the new Team0417/src/main folder, edit the "AndroidManifest.xml" file, change the line that contains
-         package="org.firstinspires.ftc.teamcode"
-    to be
-         package="org.firstinspires.ftc.team0417"
+**How it works:**
+1. IMU (gyroscope) tells us which direction the robot is facing
+2. Code uses math (trigonometry) to rotate the joystick inputs
+3. Result: joystick directions stay relative to the driver, not the robot
 
-5)  Add:    include ':Team0417' to the "/settings.gradle" file.
-    
-6)  Open up Android Studios and clean out any old files by using the menu to "Build/Clean Project""
+### Robot Heading Persistence (Auto → TeleOp)
+
+One cool feature: the robot **remembers** its direction when switching from Auto to TeleOp!
+
+**How it works:**
+- Auto program runs and sets the robot's "forward" direction
+- When Auto ends, we save that direction
+- TeleOp starts and keeps using the same "forward" direction
+- Drivers can still manually reset with the Options button if needed
+
+This is controlled by the `headingInitialized` variable in `MechanumDrive.java`.
+
+## 🚀 Getting Started
+
+### If you're new to programming:
+
+1. **Start by reading the TeleOp file** (`MechanumFieldCentricRegularTeleOp.java`)
+   - This shows how all the pieces work together
+   - Has lots of comments explaining each section
+
+2. **Then look at the Common files** to see how each robot part works
+   - `Shooter.java` - controls the shooter and feedwheel
+   - `Intake.java` - controls the intake
+   - `MechanumDrive.java` - controls the drivetrain
+
+3. **Finally check out Auto programs** to see autonomous routines
+   - These are shorter and simpler than TeleOp
+   - Good examples of using the Common classes
+
+### If you're new to Java (but know another language):
+
+- **Classes as blueprints**: Each file (MechanumDrive, Shooter, etc.) is a class
+- **Objects as instances**: In TeleOp, we create objects like `new MechanumDrive(hardwareMap)`
+- **Public methods**: Methods like `drive()`, `setSpeed()` are how we control the robot parts
+- **Static variables**: Used in MechanumDrive for the `headingInitialized` flag (persists across OpModes)
+
+### If you're new to FTC:
+
+- **OpMode**: A program that runs on the robot (either TeleOp or Autonomous)
+- **HardwareMap**: How we connect code to physical motors and sensors
+- **LinearOpMode**: The style of OpMode we use (runs top-to-bottom with loops)
+- **Driver Station**: The phone/tablet that drivers use to control the robot
+
+## 📚 Key Concepts Explained
+
+### Why do we use classes for robot parts?
+
+Instead of putting all the motor code in one giant file, we break it into pieces:
+- **Easier to understand**: Each file does one thing
+- **Reusable**: Both TeleOp and Auto can use the same MechanumDrive class
+- **Easier to test**: Can test shooter without worrying about drivetrain
+- **Multiple people can work**: One person works on shooter, another on drivetrain
+
+### What's with all the `this.` everywhere?
+
+`this.frontLeft` means "the frontLeft motor that belongs to THIS robot part"
+- It's optional but makes code clearer
+- Helps avoid confusion between variables and parameters
+
+### Why are some variables `private` and some `public`?
+
+- **private**: Only this class can use it (internal details)
+  - Example: `private DcMotor leftMotor` in Shooter.java
+- **public**: Anyone can use it (part of the interface)
+  - Example: `public static final double SPEED_HIGH` in Shooter.java
+
+This is called "encapsulation" - hiding complexity.
+
+### What does `static` mean?
+
+- **Regular variables**: Each object has its own copy
+  - Every Shooter object has its own `leftMotor`
+- **Static variables**: Shared by ALL objects of this class
+  - All MechanumDrive objects share the same `headingInitialized` flag
+  - Used for data that needs to persist across OpModes
+
+## 🐛 Troubleshooting
+
+### Robot moves in wrong direction
+- Check motor directions in `MechanumDrive.initializeDrivetrain()`
+- Your robot's motors might be mounted differently
+
+### Field-centric is backwards
+- Press the Options / Start button to reset heading
+- Or check IMU orientation in `MechanumDrive.initializeImu()`
+
+### Shooter spins wrong way
+- Check the negative sign in `Shooter.setSpeed()` on line 30
+
+### Motors keep spinning instead of stopping
+- Check ZeroPowerBehavior is set to BRAKE (do not do this for a shooter or other fast moving system)
+- Make sure you're calling `.stop()` methods
+
+## 📖 Learning Resources
+
+### Official FTC Resources
+- [Game Manual 0 (GM0)](https://gm0.org/) - Community-created FTC guide
+- [FTC Docs](https://ftc-docs.firstinspires.org/) - Official documentation
+- [FTC SDK GitHub](https://github.com/FIRST-Tech-Challenge/FtcRobotController) - Example code
+
+### Java Learning
+- [Codecademy Java](https://www.codecademy.com/learn/learn-java)
+- [W3Schools Java](https://www.w3schools.com/java/)
+
+### Advanced Topics (for when you're ready)
+- PID control for precise movements
+- Computer vision with cameras
+- Path following for complex autonomous
+- State machines for complex mechanisms
+
+## 🤝 Contributing to This Code
+
+### Before making changes:
+2. **Add comments** explaining what you changed and why
+3. **Ask for help** if you're not sure - it's better to ask than break something!
+
+### Code style guide:
+- Use clear variable names: `shooterSpeed` not `s`
+- Add comments explaining **why**, not just **what**
+- Keep methods short (one job per method)
+- Test your changes before committing
+
+## ❓ Questions?
+
+If you're stuck or confused:
+1. **Read the comments** in the code - they explain a lot!
+2. **Ask a mentor or experienced team member**
+3. **Check GM0** (gm0.org) - best FTC resource available
+4. **Google it** - lots of FTC teams share their solutions online
+
+---
+
+Remember: Everyone starts as a beginner. Don't be afraid to experiment, break code, and learn from mistakes. That's how you become better programmer!

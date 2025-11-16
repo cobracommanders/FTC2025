@@ -10,8 +10,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MechanumDrive {
 
+    // Slow mode reduces speed to 35% for precise positioning and scoring
     public static final double SLOW_MODE_MULTIPLIER = 0.35;
 
+    // Static flag to persist heading across OpMode transitions (Auto -> TeleOp)
+    // Prevents IMU reset when switching from autonomous to driver control
     private static boolean headingInitialized = false;
 
     private DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -82,9 +85,7 @@ public class MechanumDrive {
 
         rotX = rotX * 1.1;  // Counteract imperfect strafing
 
-        // Apply speed multiplier to the rotated inputs.
-        // This is mathematically equivalent (in practice) to applying the multiplier to the outputs
-        // because we're clamping the multiplier to 0 <= x <= 1
+        // Apply speed multiplier to inputs (more efficient than applying to outputs directly)
         rotX *= speedMultiplier;
         rotY *= speedMultiplier;
         rx *= speedMultiplier;
