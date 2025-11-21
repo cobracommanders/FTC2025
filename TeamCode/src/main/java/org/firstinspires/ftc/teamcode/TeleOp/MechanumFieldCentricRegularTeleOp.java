@@ -45,6 +45,9 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             }
 
             // Button control shooter speed
+            if (gamepad2.dpad_left) {
+                this.shooter.setVelocity(2500);
+            }
             if (gamepad2.y) {
                 this.shooter.setSpeed(Shooter.SPEED_HIGH);
             } else if (gamepad2.b) {
@@ -63,7 +66,7 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             } else if (gamepad1.right_bumper || gamepad2.dpad_down) {
                 intake.reverse();
             } else {
-                intake.reverse();
+                intake.stop();
             }
 
             // Below code is to control the roller before the shooter which we will call feedWheel
@@ -74,6 +77,11 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             } else {
                 this.shooter.feedStop();
             }
+
+            double counts_to_rpms = 60 / Shooter.ENCODER_COUNTER_PER_REV;
+            this.telemetry.addData("left_velocity:", this.shooter.leftMotor.getVelocity()*counts_to_rpms);
+            this.telemetry.addData("right_velocity:", this.shooter.rightMotor.getVelocity()*counts_to_rpms);
+            this.telemetry.update();
 
         }
     }

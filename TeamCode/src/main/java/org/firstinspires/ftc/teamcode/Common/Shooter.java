@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.Common;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Shooter {
+
+    public static final double ENCODER_COUNTER_PER_REV = 28.0;
 
     public static final double SPEED_LOW = 0.35;
     public static final double SPEED_MEDIUM_LOW = 0.45;
@@ -12,13 +15,17 @@ public class Shooter {
     public static final double SPEED_MAX = 1.0;
 
 
-    private DcMotor leftMotor;
-    private DcMotor rightMotor;
+    public DcMotorEx leftMotor;
+    public DcMotorEx rightMotor;
     private DcMotor feedWheel;
 
     public Shooter(HardwareMap hardwareMap) {
-        this.leftMotor = hardwareMap.dcMotor.get(HardwareConfig.SHOOTER_LEFT_MOTOR);
-        this.rightMotor = hardwareMap.dcMotor.get(HardwareConfig.SHOOTER_RIGHT_MOTOR);
+        this.leftMotor = hardwareMap.get(DcMotorEx.class, HardwareConfig.SHOOTER_LEFT_MOTOR);
+        this.rightMotor = hardwareMap.get(DcMotorEx.class, HardwareConfig.SHOOTER_RIGHT_MOTOR);
+        this.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.feedWheel = hardwareMap.dcMotor.get(HardwareConfig.FEED_WHEEL_MOTOR);
 
         this.leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -29,6 +36,11 @@ public class Shooter {
     public void setSpeed(double speed) {
         this.leftMotor.setPower(-speed);
         this.rightMotor.setPower(speed);
+    }
+
+    public void setVelocity(double rpms) {
+        // this.leftMotor.setVelocity(-1 * Shooter.ENCODER_COUNTER_PER_REV * (rpms / 60)); // uncomment once left encoder is fixed
+        this.rightMotor.setVelocity(Shooter.ENCODER_COUNTER_PER_REV * (rpms / 60));
     }
 
     public void stop() {

@@ -16,6 +16,8 @@ public class MechanumAutonomousShoot extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         this.drivetrain = new MechanumDrive(hardwareMap);
+        this.shooter = new Shooter(hardwareMap);
+        this.intake = new Intake(hardwareMap);
 
         // wait for the Auto play button to be pressed
         waitForStart();
