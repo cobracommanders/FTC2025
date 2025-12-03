@@ -49,13 +49,13 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
                 this.shooter.setVelocity(2500);
             }
             if (gamepad2.y) {
-                this.shooter.setSpeed(Shooter.SPEED_HIGH);
+                this.shooter.setVelocity(Shooter.SPEED_HIGH);
             } else if (gamepad2.b) {
-                this.shooter.setSpeed(Shooter.SPEED_MEDIUM_HIGH);
+                this.shooter.setVelocity(Shooter.SPEED_MEDIUM_HIGH);
             } else if (gamepad2.a) {
-                this.shooter.setSpeed(Shooter.SPEED_MEDIUM_LOW);
+                this.shooter.setVelocity(Shooter.SPEED_MEDIUM_LOW);
             } else if (gamepad2.x) {
-                this.shooter.setSpeed(Shooter.SPEED_LOW);
+                this.shooter.setVelocity(Shooter.SPEED_LOW);
             } else {
                 this.shooter.stop();
             }
@@ -71,16 +71,16 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
 
             // Below code is to control the roller before the shooter which we will call feedWheel
             if (gamepad2.right_bumper) {
-               this.shooter.feed();
+               this.shooter.feedReverse();
             } else if (gamepad2.left_bumper) {
-                this.shooter.feedReverse();
+                this.shooter.feed();
             } else {
                 this.shooter.feedStop();
             }
 
-            double counts_to_rpms = 60 / Shooter.ENCODER_COUNTER_PER_REV;
-            this.telemetry.addData("left_velocity:", this.shooter.leftMotor.getVelocity()*counts_to_rpms);
-            this.telemetry.addData("right_velocity:", this.shooter.rightMotor.getVelocity()*counts_to_rpms);
+            this.telemetry.addData("left_velocity:", this.shooter.getLeftVelocity());
+            this.telemetry.addData("right_velocity:", this.shooter.getRightVelocity());
+            this.telemetry.addData("target_velocity:", this.shooter.getTargetVelocity());
             this.telemetry.update();
 
         }
