@@ -14,17 +14,23 @@ public class Shooter {
     public static final double SPEED_MEDIUM_HIGH = 2250;
     public static final double SPEED_HIGH = 2500;
     public static final double SPEED_MAX = 1.0;
+    public static final double FEED_SPEED = -1.0;
+    public static final double FEED_SPEED_REVERSE = 1.0;
+    public static final double FEED_IDLE = -0.2;
     public static final double COUNTS_TO_RPMS = 60 / Shooter.ENCODER_COUNTER_PER_REV;
     public static final double kP = 5.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kF = 12.5;
+    public static final double READY_THRESH_UPPER = 1.04;
+    public static final double READY_THRESH_LOWER = 0.96;
 
 
     public DcMotorEx leftMotor;
     public DcMotorEx rightMotor;
     private DcMotor feedWheel;
     private double targetVelocity;
+    public final boolean enableAutoShoot = false;
 
     public Shooter(HardwareMap hardwareMap) {
         this.leftMotor = hardwareMap.get(DcMotorEx.class, HardwareConfig.SHOOTER_LEFT_MOTOR);
@@ -73,20 +79,35 @@ public class Shooter {
         return this.leftMotor.getVelocity()*COUNTS_TO_RPMS;
     }
 
+    public double getVelocity() {
+        return (this.getRightVelocity() + this.getLeftVelocity()) / 2;
+    }
+
+    public boolean isReady() {
+        double minVelocity = this.targetVelocity * READY_THRESH_LOWER;
+        double maxVelocity = this.targetVelocity * READY_THRESH_UPPER;
+        double currentVelocity = this.getVelocity();
+        return minVelocity <= currentVelocity && currentVelocity <= maxVelocity;
+    }
+
     public void stop() {
         this.leftMotor.setPower(0);
         this.rightMotor.setPower(0);
     }
 
     public void feed() {
-        this.feedWheel.setPower(-1.0);
+        this.feedWheel.setPower(FEED_SPEED);
     }
 
     public void feedReverse() {
-        this.feedWheel.setPower(1.0);
+        this.feedWheel.setPower(FEED_SPEED_REVERSE);
     }
 
     public void feedStop() {
-        this.feedWheel.setPower(-0.1);
+        this.feedWheel.setPower(0);
+    }
+
+    public void feedIdle() {
+        this.feedWheel.setPower(FEED_IDLE);
     }
 }

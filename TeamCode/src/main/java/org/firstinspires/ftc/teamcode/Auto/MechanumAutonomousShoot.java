@@ -24,10 +24,12 @@ public class MechanumAutonomousShoot extends LinearOpMode {
 
         resetRuntime();  // at Auto start, reset the stopwatch
 
-        // while Auto isn't stopped and the stopwatch is less that 1.0, drive backwards
-        while (opModeIsActive() && getRuntime() < 2.0) {
-            this.drivetrain.drive(0, -0.25, 0, 1.0);
-        }
+        // Your implementation here!!!
+
+        // Stop everything when auto ends
         this.drivetrain.stop();
+        this.intake.stop();
+        this.shooter.stop();
+        this.shooter.feedStop();
     }
 }

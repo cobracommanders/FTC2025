@@ -70,17 +70,29 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             }
 
             // Below code is to control the roller before the shooter which we will call feedWheel
+            // We've added an experimental mode to automatically shoot while holding the feed button
             if (gamepad2.right_bumper) {
-               this.shooter.feedReverse();
-            } else if (gamepad2.left_bumper) {
-                this.shooter.feed();
+                this.shooter.feedReverse();
+            } else if (this.shooter.enableAutoShoot) {
+                if (gamepad2.left_bumper && this.shooter.isReady()) {
+                    this.shooter.feed();
+                } else {
+                    this.shooter.feedIdle();
+                }
             } else {
-                this.shooter.feedStop();
+                 if (gamepad2.left_bumper) {
+                    this.shooter.feed();
+                } else {
+                    this.shooter.feedIdle();
+                }
             }
 
+            this.telemetry.addData("auto_shoot_enabled:", this.shooter.enableAutoShoot);
             this.telemetry.addData("left_velocity:", this.shooter.getLeftVelocity());
             this.telemetry.addData("right_velocity:", this.shooter.getRightVelocity());
+            this.telemetry.addData("average_velocity:", this.shooter.getVelocity());
             this.telemetry.addData("target_velocity:", this.shooter.getTargetVelocity());
+            this.telemetry.addData("shooter_ready:", this.shooter.isReady());
             this.telemetry.update();
 
         }

@@ -112,4 +112,58 @@ public class MechanumDrive {
         this.frontRight.setPower(0);
         this.backRight.setPower(0);
     }
+
+    public void turnToHeading(double targetHeadingDegrees, double power) {
+        double targetRadians = Math.toRadians(targetHeadingDegrees);
+        double currentHeading = getHeading();
+        double error = targetRadians - currentHeading;
+
+        // Normalize error to [-PI, PI]
+        while (error > Math.PI) error -= 2 * Math.PI;
+        while (error < -Math.PI) error += 2 * Math.PI;
+
+        // Turn until close enough (within ~2 degrees)
+        while (Math.abs(error) > Math.toRadians(2)) {
+            // Determine turn direction
+            double turnPower = error > 0 ? power : -power;
+
+            this.drive(0, 0, turnPower, 1.0);
+
+            // Update error
+            currentHeading = getHeading();
+            error = targetRadians - currentHeading;
+
+            // Normalize error
+            while (error > Math.PI) error -= 2 * Math.PI;
+            while (error < -Math.PI) error += 2 * Math.PI;
+        }
+
+        this.stop();
+    }
+
+    public void turnToHeadingProportional(double targetHeadingDegrees, double maxPower) {
+        double targetRadians = Math.toRadians(targetHeadingDegrees);
+        double currentHeading = getHeading();
+        double error = targetRadians - currentHeading;
+
+        // Normalize error to [-PI, PI]
+        while (error > Math.PI) error -= 2 * Math.PI;
+        while (error < -Math.PI) error += 2 * Math.PI;
+
+        while (Math.abs(error) > Math.toRadians(2)) {
+            // Proportional control: power scales with error
+            double turnPower = error * 0.5;  // kP = 0.5
+            turnPower = Math.max(-maxPower, Math.min(maxPower, turnPower));  // Clamp to max power
+
+            this.drive(0, 0, turnPower, 1.0);
+
+            currentHeading = getHeading();
+            error = targetRadians - currentHeading;
+
+            while (error > Math.PI) error -= 2 * Math.PI;
+            while (error < -Math.PI) error += 2 * Math.PI;
+        }
+
+        this.stop();
+    }
 }
