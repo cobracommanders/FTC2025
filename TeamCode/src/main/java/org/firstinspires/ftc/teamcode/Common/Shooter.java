@@ -19,11 +19,11 @@ public class Shooter {
     public static final double FEED_IDLE = -0.2;
     public static final double COUNTS_TO_RPMS = 60 / Shooter.ENCODER_COUNTER_PER_REV;
     public static final double kP = 5.0;
-    public static final double kI = 0.0;
+    public static final double kI = 0.05;
     public static final double kD = 0.0;
     public static final double kF = 12.5;
-    public static final double READY_THRESH_UPPER = 1.04;
-    public static final double READY_THRESH_LOWER = 0.96;
+    public static final double READY_THRESH_UPPER = 1.02;
+    public static final double READY_THRESH_LOWER = 0.98;
 
 
     public DcMotorEx leftMotor;
@@ -76,7 +76,7 @@ public class Shooter {
     }
 
     public double getLeftVelocity() {
-        return this.leftMotor.getVelocity()*COUNTS_TO_RPMS;
+        return -1* this.leftMotor.getVelocity()*COUNTS_TO_RPMS;
     }
 
     public double getVelocity() {

@@ -24,7 +24,7 @@ public class MechanumAutonomousDriveBackwards extends LinearOpMode {
         // while Auto isn't stopped and the stopwatch is less that 1.0, drive backwards
         this.shooter.feedIdle();
         while (opModeIsActive() && getRuntime() < 3.0) {
-            this.drivetrain.drive(0, -0.3, 0, 1.0);
+            this.drivetrain.drive(0, 0.35, 0, 1.0);
         }
         this.drivetrain.stop();
     }

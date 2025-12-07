@@ -12,7 +12,7 @@ Starter steps:
 
 ## Autonomous Template
 
-Use MechanumAutonomousShoot ([source](MechanumAutonomousShoot.java)) as a template. Feel free to update it. Right now it doesn't do anything
+Use MechanumAutonomousShoot ([source](MechanumAutonomousShootBLUE.java)) as a template. Feel free to update it. Right now it doesn't do anything
 
 ```java
 package org.firstinspires.ftc.teamcode.Auto;

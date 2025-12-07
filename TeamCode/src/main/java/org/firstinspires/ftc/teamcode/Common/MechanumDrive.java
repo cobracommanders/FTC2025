@@ -53,7 +53,7 @@ public class MechanumDrive {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         this.imu.initialize(parameters);
     }
 

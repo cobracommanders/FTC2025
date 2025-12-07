@@ -36,7 +36,7 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
             double leftTrigger = gamepad1.left_trigger;
-            this.drivetrain.drive(x, y, rx, leftTrigger);
+            this.drivetrain.drive(-x, -y, rx, leftTrigger);
 
             // Reset robot field orientation
             // The equivalent button is start on Xbox-style controllers
