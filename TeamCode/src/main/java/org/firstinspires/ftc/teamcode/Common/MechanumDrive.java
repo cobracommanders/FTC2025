@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Common;
 
 import static java.lang.Math.signum;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -11,7 +13,44 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MechanumDrive {
+
+    /**
+     * Data captured from a single iteration of the PIDF turn controller.
+     * Used for post-run analysis and tuning.
+     */
+    public static class TurnData {
+        public final long timestamp;
+        public final double error;
+        public final double p;
+        public final double i;
+        public final double d;
+        public final double f;
+        public final double output;
+
+        public TurnData(long timestamp, double error, double p, double i, double d, double f, double output) {
+            this.timestamp = timestamp;
+            this.error = error;
+            this.p = p;
+            this.i = i;
+            this.d = d;
+            this.f = f;
+            this.output = output;
+        }
+
+        /** Returns data as CSV row: timestamp,error,p,i,d,f,output */
+        public String toCsv() {
+            return timestamp + "," + error + "," + p + "," + i + "," + d + "," + f + "," + output;
+        }
+
+        /** CSV header for use with toCsv() */
+        public static String csvHeader() {
+            return "timestamp,error,p,i,d,f,output";
+        }
+    }
 
     // Slow mode reduces speed to 35% for precise positioning and scoring
     public static final double SLOW_MODE_MULTIPLIER = 0.35;
@@ -28,6 +67,8 @@ public class MechanumDrive {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private IMU imu;
     private PIDFCoefficients imuCoefficients;
+    private List<TurnData> lastTurnHistory;
+    private boolean lastTurnTimedOut;
 
     public MechanumDrive(HardwareMap hardwareMap) {
         this.frontLeft = hardwareMap.dcMotor.get(HardwareConfig.FRONT_LEFT_DRIVE_MOTOR);
@@ -127,168 +168,30 @@ public class MechanumDrive {
         this.backRight.setPower(0);
     }
 
-    public void turnToHeading(double targetHeadingDegrees, double power) {
-        double targetRadians = Math.toRadians(targetHeadingDegrees);
-        double currentHeading = getHeading();
-        double error = targetRadians - currentHeading;
-
-        // Normalize error to [-PI, PI]
-        while (error > Math.PI) error -= 2 * Math.PI;
-        while (error < -Math.PI) error += 2 * Math.PI;
-
-        // Turn until close enough (within ~2 degrees)
-        while (Math.abs(error) > Math.toRadians(2)) {
-            // Determine turn direction
-            double turnPower = error > 0 ? power : -power;
-
-            this.drive(0, 0, turnPower, 1.0);
-
-            // Update error
-            currentHeading = getHeading();
-            error = targetRadians - currentHeading;
-
-            // Normalize error
-            while (error > Math.PI) error -= 2 * Math.PI;
-            while (error < -Math.PI) error += 2 * Math.PI;
-        }
-
-        this.stop();
+    /**
+     * Returns the history from the last turnToHeadingPIDF call.
+     * Each entry contains timestamp, error, and PIDF component values.
+     * @return List of TurnData, or null if turnToHeadingPIDF hasn't been called
+     */
+    public List<TurnData> getLastTurnHistory() {
+        return lastTurnHistory;
     }
 
-    public void turnToHeadingProportional(double targetHeadingDegrees, double maxPower) {
-        double targetRadians = Math.toRadians(targetHeadingDegrees);
-        double currentHeading = getHeading();
-        double error = targetRadians - currentHeading;
-
-        // Normalize error to [-PI, PI]
-        while (error > Math.PI) error -= 2 * Math.PI;
-        while (error < -Math.PI) error += 2 * Math.PI;
-
-        while (Math.abs(error) > Math.toRadians(2)) {
-            // Proportional control: power scales with error
-            double turnPower = error * 0.5;  // kP = 0.5
-            turnPower = Math.max(-maxPower, Math.min(maxPower, turnPower));  // Clamp to max power
-
-            this.drive(0, 0, turnPower, 1.0);
-
-            currentHeading = getHeading();
-            error = targetRadians - currentHeading;
-
-            while (error > Math.PI) error -= 2 * Math.PI;
-            while (error < -Math.PI) error += 2 * Math.PI;
-        }
-        this.stop();
+    /**
+     * Returns whether the last turnToHeadingPIDF call ended due to timeout.
+     * @return true if timed out, false if reached target heading
+     */
+    public boolean didLastTurnTimeout() {
+        return lastTurnTimedOut;
     }
 
-    public void turnToHeadingPID(double targetHeadingDegrees, double maxPower, double timeoutSeconds) {
-        double targetRadians = Math.toRadians(targetHeadingDegrees);
-        double tolerance = Math.toRadians(2);  // 2 degrees
-
-        double previousError = 0;
-        long startTime = System.currentTimeMillis();
-        long timeoutMs = (long)(timeoutSeconds * 1000);
-        double dt = 0.02;  // 20ms loop time in seconds
-
-        while (true) {
-            // Timeout check
-            if (System.currentTimeMillis() - startTime > timeoutMs) {
-                break;
-            }
-
-            // Calculate error
-            double currentHeading = getHeading();
-            double error = targetRadians - currentHeading;
-
-            // Normalize error to [-PI, PI]
-            while (error > Math.PI) error -= 2 * Math.PI;
-            while (error < -Math.PI) error += 2 * Math.PI;
-
-            // Exit if within tolerance
-            if (Math.abs(error) < tolerance) {
-                break;
-            }
-
-            // PD calculation - derivative is rate of change of error (rad/sec)
-            double derivative = (error - previousError) / dt;
-            double turnPower = (this.imuCoefficients.p * error) + (this.imuCoefficients.d * derivative);
-
-            // Clamp to max power
-            turnPower = Math.max(-maxPower, Math.min(maxPower, turnPower));
-
-            // Apply power (scaler=0.0 to bypass slow mode and use full PID-calculated power)
-            this.drive(0, 0, turnPower, 0.0);
-
-            previousError = error;
-
-            // Sleep to maintain consistent loop rate (20ms = 50Hz control loop)
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-
-        this.stop();
-    }
-
-    // Tunable version - pass kP and kD directly for live tuning
-    public void turnToHeadingPID(double targetHeadingDegrees, double kP, double kD, double maxPower, double timeoutSeconds) {
-        double targetRadians = Math.toRadians(targetHeadingDegrees);
-        double tolerance = Math.toRadians(2);
-
-        double previousError = 0;
-        long startTime = System.currentTimeMillis();
-        long timeoutMs = (long)(timeoutSeconds * 1000);
-        double dt = 0.02;  // 20ms loop time in seconds
-
-        while (true) {
-            // Timeout check
-            if (System.currentTimeMillis() - startTime > timeoutMs) {
-                break;
-            }
-
-            // Calculate error
-            double currentHeading = getHeading();
-            double error = targetRadians - currentHeading;
-
-            // Normalize error to [-PI, PI]
-            while (error > Math.PI) error -= 2 * Math.PI;
-            while (error < -Math.PI) error += 2 * Math.PI;
-
-            // Exit if within tolerance
-            if (Math.abs(error) < tolerance) {
-                break;
-            }
-
-            // PD calculation - derivative is rate of change of error (rad/sec)
-            double derivative = (error - previousError) / dt;
-            double turnPower = (kP * error) + (kD * derivative);
-
-            // Clamp to max power
-            turnPower = Math.max(-maxPower, Math.min(maxPower, turnPower));
-
-            // Apply power (scaler=0.0 to bypass slow mode and use full PID-calculated power)
-            this.drive(0, 0, turnPower, 0.0);
-
-            previousError = error;
-
-            // Sleep to maintain consistent loop rate (20ms = 50Hz control loop)
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-
-        this.stop();
-    }
 
     /**
      * Turns the robot to a target heading using PIDF control.
      *
      * <p>This method uses a full PIDF (Proportional-Integral-Derivative-Feedforward) controller
-     * to rotate the robot to the specified heading. The control loop runs at 50Hz until the
-     * robot is within 3 degrees of the target or the timeout is reached.</p>
+     * to rotate the robot to the specified heading. The control loop runs at approximately 50Hz
+     * (20ms minimum period) until the robot is within 3 degrees of the target or the timeout is reached.</p>
      *
      * <h3>PIDF Components:</h3>
      * <ul>
@@ -309,13 +212,31 @@ public class MechanumDrive {
      *   <li>If the robot stops short of the target, add small amounts of kI.</li>
      * </ol>
      *
+     * <h3>Data Logging:</h3>
+     * <p>This method logs PIDF data for tuning and analysis:</p>
+     * <ul>
+     *   <li><b>Real-time:</b> Sends error and PIDF values to FTC Dashboard each iteration.
+     *       Connect to {@code 192.168.43.1:8080} to view live graphs.</li>
+     *   <li><b>History:</b> Stores all iterations in memory. Retrieve after the turn completes
+     *       using {@link #getLastTurnHistory()} for offline analysis.</li>
+     *   <li><b>Timeout status:</b> Check if the turn timed out using {@link #didLastTurnTimeout()}.</li>
+     * </ul>
+     *
      * <h3>Example Usage:</h3>
      * <pre>{@code
      * // Turn to 90 degrees with tuned gains
      * drivetrain.turnToHeadingPIDF(90.0, 0.8, 0.05, 0.01, 0.6, 3.0);
      *
-     * // Turn to -45 degrees with higher max power
-     * drivetrain.turnToHeadingPIDF(-45.0, 0.8, 0.05, 0.01, 0.8, 2.0);
+     * // Check results
+     * if (drivetrain.didLastTurnTimeout()) {
+     *     telemetry.addLine("Turn timed out!");
+     * }
+     *
+     * // Export data for analysis
+     * List<TurnData> history = drivetrain.getLastTurnHistory();
+     * for (TurnData d : history) {
+     *     telemetry.addLine(d.toCsv());
+     * }
      * }</pre>
      *
      * @param targetAngle Target heading in degrees. Positive is counter-clockwise from the
@@ -330,10 +251,15 @@ public class MechanumDrive {
      *                    Lower values give more control, higher values give faster turns.
      * @param timeout_sec Maximum time in seconds before the method returns, even if the
      *                    target heading is not reached. Prevents infinite loops.
+     *
+     * @see #getLastTurnHistory()
+     * @see #didLastTurnTimeout()
+     * @see TurnData
      */
     public void turnToHeadingPIDF(double targetAngle, double kP, double kD, double kI, double powerMax, double timeout_sec) {
+        // measured good values (max speed 0.8): kp=0.4, kd=0.05, ki=0; kp=0.4, kd=0.1, ki=0;
         double targetRadians = Math.toRadians(targetAngle);
-        double tolerance = Math.toRadians(3);
+        double tolerance = Math.toRadians(1);
         double kF = 0.09;
         double maxIntegral = 10;
 
@@ -343,10 +269,16 @@ public class MechanumDrive {
         long previousTime = startTime;
         long timeoutMs = (long)(timeout_sec * 1000);
 
+        // Initialize logging
+        this.lastTurnHistory = new ArrayList<>();
+        this.lastTurnTimedOut = false;
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+
         while (true) {
             long currentTime = System.currentTimeMillis();
 
             if (currentTime - startTime > timeoutMs) {
+                this.lastTurnTimedOut = true;
                 break;
             }
 
@@ -358,6 +290,7 @@ public class MechanumDrive {
             while (error < -Math.PI) error += 2 * Math.PI;
 
             if (Math.abs(error) < tolerance) {
+                this.stop();
                 break;
             }
 
@@ -369,14 +302,30 @@ public class MechanumDrive {
 
             double p = kP * error;
             double d = kD * (error - previousError) / dt;
-            integral += kI * error * dt;
+            integral += kI * error;
             integral = Math.max(-maxIntegral, Math.min(maxIntegral, integral));
             double f = signum(error) * kF;
 
             double turnPower = p + integral + d + f;
             turnPower = Math.max(-powerMax, Math.min(powerMax, turnPower));
 
-            this.drive(0, 0, turnPower, 0.0);
+            // Log data for post-run analysis
+            long elapsed = currentTime - startTime;
+            TurnData data = new TurnData(elapsed, error, p, integral, d, f, turnPower);
+            this.lastTurnHistory.add(data);
+
+            // Send to FTC Dashboard for real-time graphing
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("turn/error", Math.toDegrees(error));
+            packet.put("turn/p", p);
+            packet.put("turn/i", integral);
+            packet.put("turn/d", d);
+            packet.put("turn/f", f);
+            packet.put("turn/output", turnPower);
+            packet.put("heading", Math.toDegrees(currentHeading));
+            dashboard.sendTelemetryPacket(packet);
+
+            this.drive(0, 0, -turnPower, 0.0);
 
             previousError = error;
             previousTime = currentTime;

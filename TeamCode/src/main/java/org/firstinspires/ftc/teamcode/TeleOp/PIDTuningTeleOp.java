@@ -11,10 +11,10 @@ public class PIDTuningTeleOp extends LinearOpMode {
     private MechanumDrive drivetrain;
 
     // PID tuning parameters
-    private double kP = 0.1;
-    private double kD = 0.0;
+    private double kP = 0.400;
+    private double kD = 0.050;
     private double kI = 0.0;
-    private double maxPower = 0.7;
+    private double maxPower = 0.8;
     private double targetHeading = 90.0;
 
     // Adjustment step sizes
@@ -101,11 +101,11 @@ public class PIDTuningTeleOp extends LinearOpMode {
             if (gamepad1.a) {
                 telemetry.addLine("EXECUTING TURN...");
                 telemetry.update();
-                drivetrain.turnToHeadingPIDF(targetHeading, kP, kD, kI, maxPower, 4.0);
+                drivetrain.turnToHeadingPIDF(targetHeading, kP, kD, kI, maxPower, 8.0);
             } else if (gamepad1.b) {
                 telemetry.addLine("EXECUTING TURN...");
                 telemetry.update();
-                drivetrain.turnToHeadingPIDF(-targetHeading, kP, kD, kI, maxPower, 4.0);
+                drivetrain.turnToHeadingPIDF(-targetHeading, kP, kD, kI, maxPower, 8.0);
             }
 
             // Reset IMU
@@ -123,8 +123,8 @@ public class PIDTuningTeleOp extends LinearOpMode {
             lastRightBumper = gamepad1.right_bumper;
             lastX = gamepad1.x;
             lastY = gamepad1.y;
-            lastA = gamepad1.a;
-            lastB = gamepad1.b;
+            lastA = gamepad2.a;
+            lastB = gamepad2.b;
 
             // Display current parameters
             telemetry.addData("kP", "%.3f", kP);
