@@ -52,8 +52,46 @@ public class MechanumDrive {
         }
     }
 
+    /**
+     * Data captured from a single iteration of the PIDF drive controller.
+     * Used for post-run analysis and tuning.
+     */
+    public static class DriveData {
+        public final long timestamp;
+        public final double distanceError;
+        public final double headingError;
+        public final double drivePower;
+        public final double headingCorrection;
+
+        public DriveData(long timestamp, double distanceError, double headingError,
+                         double drivePower, double headingCorrection) {
+            this.timestamp = timestamp;
+            this.distanceError = distanceError;
+            this.headingError = headingError;
+            this.drivePower = drivePower;
+            this.headingCorrection = headingCorrection;
+        }
+
+        /** Returns data as CSV row */
+        public String toCsv() {
+            return timestamp + "," + distanceError + "," + headingError + "," +
+                   drivePower + "," + headingCorrection;
+        }
+
+        /** CSV header for use with toCsv() */
+        public static String csvHeader() {
+            return "timestamp,distanceError,headingError,drivePower,headingCorrection";
+        }
+    }
+
     // Slow mode reduces speed to 35% for precise positioning and scoring
     public static final double SLOW_MODE_MULTIPLIER = 0.35;
+
+    // Encoder constants - configure these for your robot
+    // GoBilda 312 RPM motors: 537.7 ticks/rev, 96mm wheels
+    public static final double TICKS_PER_REV = 537.7;
+    public static final double WHEEL_DIAMETER_INCHES = 3.78;  // 96mm ≈ 3.78 inches
+    public static final double TICKS_PER_INCH = TICKS_PER_REV / (WHEEL_DIAMETER_INCHES * Math.PI);
 
     // Static flag to persist heading across OpMode transitions (Auto -> TeleOp)
     // Prevents IMU reset when switching from autonomous to driver control
@@ -69,6 +107,8 @@ public class MechanumDrive {
     private PIDFCoefficients imuCoefficients;
     private List<TurnData> lastTurnHistory;
     private boolean lastTurnTimedOut;
+    private List<DriveData> lastDriveHistory;
+    private boolean lastDriveTimedOut;
 
     public MechanumDrive(HardwareMap hardwareMap) {
         this.frontLeft = hardwareMap.dcMotor.get(HardwareConfig.FRONT_LEFT_DRIVE_MOTOR);
@@ -185,6 +225,45 @@ public class MechanumDrive {
         return lastTurnTimedOut;
     }
 
+    /**
+     * Returns the history from the last driveStraightPIDF call.
+     * @return List of DriveData, or null if driveStraightPIDF hasn't been called
+     */
+    public List<DriveData> getLastDriveHistory() {
+        return lastDriveHistory;
+    }
+
+    /**
+     * Returns whether the last driveStraightPIDF call ended due to timeout.
+     * @return true if timed out, false if reached target distance
+     */
+    public boolean didLastDriveTimeout() {
+        return lastDriveTimedOut;
+    }
+
+    /**
+     * Returns the average encoder position of all four drive motors.
+     * @return Average encoder ticks
+     */
+    private double getAverageEncoderPosition() {
+        return (frontLeft.getCurrentPosition() + frontRight.getCurrentPosition() +
+                backLeft.getCurrentPosition() + backRight.getCurrentPosition()) / 4.0;
+    }
+
+    /**
+     * Resets all drive motor encoders to zero.
+     */
+    private void resetEncoders() {
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 
     /**
      * Turns the robot to a target heading using PIDF control.
@@ -338,5 +417,171 @@ public class MechanumDrive {
         }
 
         this.stop();
+    }
+
+    /**
+     * Drives the robot straight for a specified distance using PIDF control with IMU heading correction.
+     *
+     * <p>This method uses encoder feedback for distance control and IMU feedback to maintain
+     * a straight heading. The control loop runs at approximately 50Hz until the robot reaches
+     * the target distance (within tolerance) or the timeout is reached.</p>
+     *
+     * <h3>Control Strategy:</h3>
+     * <ul>
+     *   <li><b>Distance PIDF:</b> Controls forward/backward power based on remaining distance.</li>
+     *   <li><b>Heading P:</b> Applies rotation correction to maintain the starting heading.</li>
+     * </ul>
+     *
+     * <h3>Data Logging:</h3>
+     * <p>Logs data to FTC Dashboard under the "drive/" namespace:</p>
+     * <ul>
+     *   <li>drive/distanceError - remaining distance in inches</li>
+     *   <li>drive/headingError - heading deviation in degrees</li>
+     *   <li>drive/power - forward/backward motor power</li>
+     *   <li>drive/correction - heading correction power</li>
+     * </ul>
+     *
+     * <h3>Example Usage:</h3>
+     * <pre>{@code
+     * // Drive forward 24 inches
+     * drivetrain.driveStraightPIDF(24.0, 0.05, 0.01, 0.001, 0.6, 5.0);
+     *
+     * // Drive backward 12 inches
+     * drivetrain.driveStraightPIDF(-12.0, 0.05, 0.01, 0.001, 0.6, 3.0);
+     * }</pre>
+     *
+     * @param distanceInches Target distance in inches. Positive = forward, negative = backward.
+     * @param kP             Proportional gain for distance. Typical starting value: 0.02-0.1.
+     *                       Units: power per inch of error.
+     * @param kD             Derivative gain for distance. Typical starting value: 0.001-0.01.
+     *                       Units: power per (inch/second) of error change rate.
+     * @param kI             Integral gain for distance. Typical starting value: 0.0-0.005.
+     *                       Units: power per inch of accumulated error.
+     * @param powerMax       Maximum motor power, clamped to [0, 1].
+     * @param timeout_sec    Maximum time in seconds before the method returns.
+     *
+     * @see #getLastDriveHistory()
+     * @see #didLastDriveTimeout()
+     * @see DriveData
+     */
+    public void driveStraightPIDF(double distanceInches, double kP, double kD, double kI,
+                                   double powerMax, double timeout_sec) {
+        double targetTicks = distanceInches * TICKS_PER_INCH;
+        double toleranceTicks = 0.5 * TICKS_PER_INCH;  // 0.5 inch tolerance
+        double kF = 0.05;  // Feedforward to overcome static friction
+        double maxIntegral = 0.3;
+
+        // Heading correction gain (P only for simplicity)
+        double headingKp = 0.5;
+
+        // Reset encoders and capture starting heading
+        resetEncoders();
+        double targetHeading = getHeading();
+
+        double previousError = 0;
+        double integral = 0;
+        long startTime = System.currentTimeMillis();
+        long previousTime = startTime;
+        long timeoutMs = (long)(timeout_sec * 1000);
+
+        // Initialize logging
+        this.lastDriveHistory = new ArrayList<>();
+        this.lastDriveTimedOut = false;
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+
+        while (true) {
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - startTime > timeoutMs) {
+                this.lastDriveTimedOut = true;
+                break;
+            }
+
+            // Calculate distance error
+            double currentTicks = getAverageEncoderPosition();
+            double distanceError = targetTicks - currentTicks;
+
+            // Check if we've reached the target
+            if (Math.abs(distanceError) < toleranceTicks) {
+                break;
+            }
+
+            // Calculate heading error for correction
+            double currentHeading = getHeading();
+            double headingError = targetHeading - currentHeading;
+
+            // Normalize heading error to [-PI, PI]
+            while (headingError > Math.PI) headingError -= 2 * Math.PI;
+            while (headingError < -Math.PI) headingError += 2 * Math.PI;
+
+            // Calculate dt in seconds
+            double dt = (currentTime - previousTime) / 1000.0;
+            if (dt < 0.001) {
+                dt = 0.02;
+            }
+
+            // Distance PIDF calculation
+            double p = kP * distanceError;
+            double d = kD * (distanceError - previousError) / dt;
+            integral += kI * distanceError;
+            integral = Math.max(-maxIntegral, Math.min(maxIntegral, integral));
+            double f = signum(distanceError) * kF;
+
+            double drivePower = p + integral + d + f;
+            drivePower = Math.max(-powerMax, Math.min(powerMax, drivePower));
+
+            // Heading correction (P only)
+            double headingCorrection = headingKp * headingError;
+            headingCorrection = Math.max(-0.3, Math.min(0.3, headingCorrection));
+
+            // Log data
+            long elapsed = currentTime - startTime;
+            double distanceErrorInches = distanceError / TICKS_PER_INCH;
+            DriveData data = new DriveData(elapsed, distanceErrorInches,
+                    Math.toDegrees(headingError), drivePower, headingCorrection);
+            this.lastDriveHistory.add(data);
+
+            // Send to FTC Dashboard
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("drive/distanceError", distanceErrorInches);
+            packet.put("drive/headingError", Math.toDegrees(headingError));
+            packet.put("drive/power", drivePower);
+            packet.put("drive/correction", headingCorrection);
+            packet.put("drive/p", p);
+            packet.put("drive/i", integral);
+            packet.put("drive/d", d);
+            dashboard.sendTelemetryPacket(packet);
+
+            // Apply power: y = forward/back, rx = rotation correction
+            this.driveRobotCentric(0, drivePower, -headingCorrection);
+
+            previousError = distanceError;
+            previousTime = currentTime;
+
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+
+        this.stop();
+    }
+
+    /**
+     * Drives the robot without field-centric transformation.
+     * Used internally for straight-line driving with heading correction.
+     */
+    private void driveRobotCentric(double x, double y, double rx) {
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
+
+        this.frontLeft.setPower(frontLeftPower);
+        this.backLeft.setPower(backLeftPower);
+        this.frontRight.setPower(frontRightPower);
+        this.backRight.setPower(backRightPower);
     }
 }
