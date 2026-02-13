@@ -101,17 +101,23 @@ public class MechanumAutonomousShootBLUE extends LinearOpMode {
         }
         this.drivetrain.stop();
 
+        //Drive backwards
         resetRuntime();
-        while (opModeIsActive() && getRuntime() < 3.0) {
-            this.drivetrain.drive(0, 0.35, 0, 1.0);
+        while (opModeIsActive() && getRuntime() < 2.0) {
+            this.drivetrain.drive(0, 0.5, 0, 1.0);
         }
         this.drivetrain.stop();
 
+        //Strafe left
+        resetRuntime();
+        while (opModeIsActive() && getRuntime() < 2.0) {
+            this.drivetrain.drive(0, 0.35, 0, 1.0);
 
-        // Stop everything when auto ends
-        this.drivetrain.stop();
-        this.intake.stop();
-        this.shooter.stop();
-        this.shooter.feedStop();
+            // Stop everything when auto ends
+            this.drivetrain.stop();
+            this.intake.stop();
+            this.shooter.stop();
+            this.shooter.feedStop();
+        }
     }
 }

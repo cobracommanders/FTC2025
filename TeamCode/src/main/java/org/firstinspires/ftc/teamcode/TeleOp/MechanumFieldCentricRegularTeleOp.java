@@ -11,10 +11,10 @@ import org.firstinspires.ftc.teamcode.Common.Shooter;
 public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
 
     private MechanumDrive drivetrain;
-
+    boolean kickstandoff = true;
     private Shooter shooter;
     private Intake intake;
-
+//    private Shooter feedWheel;
 
 
     @Override
@@ -71,22 +71,19 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
 
             // Below code is to control the roller before the shooter which we will call feedWheel
             // We've added an experimental mode to automatically shoot while holding the feed button
-            if (gamepad2.right_bumper) {
-                this.shooter.feedReverse();
-            } else if (this.shooter.enableAutoShoot) {
-                if (gamepad2.left_bumper && this.shooter.isReady()) {
-                    this.shooter.feed();
-                } else {
-                    this.shooter.feedIdle();
-                }
-            } else {
-                 if (gamepad2.left_bumper) {
-                    this.shooter.feed();
-                } else {
-                    this.shooter.feedIdle();
-                }
+            if (gamepad1.a) {
+                shooter.servoOpen();
+            } else if (gamepad1.b) {
+                shooter.servoClose();
             }
-
+            if (gamepad1.dpad_left); {
+                kickstandoff = !kickstandoff;
+            }
+            if(kickstandoff){
+                shooter.feedStop();
+            } else {
+                shooter.kick();
+            }
             this.telemetry.addData("auto_shoot_enabled:", this.shooter.enableAutoShoot);
             this.telemetry.addData("left_velocity:", this.shooter.getLeftVelocity());
             this.telemetry.addData("right_velocity:", this.shooter.getRightVelocity());

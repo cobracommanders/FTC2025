@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter {
 
@@ -29,12 +30,14 @@ public class Shooter {
     public DcMotorEx leftMotor;
     public DcMotorEx rightMotor;
     private DcMotor feedWheel;
+    private Servo servo;
     private double targetVelocity;
     public final boolean enableAutoShoot = false;
 
     public Shooter(HardwareMap hardwareMap) {
         this.leftMotor = hardwareMap.get(DcMotorEx.class, HardwareConfig.SHOOTER_LEFT_MOTOR);
         this.rightMotor = hardwareMap.get(DcMotorEx.class, HardwareConfig.SHOOTER_RIGHT_MOTOR);
+        this.servo = hardwareMap.get(Servo.class, HardwareConfig.FEED_SERVO);
         this.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -107,7 +110,12 @@ public class Shooter {
         this.feedWheel.setPower(0);
     }
 
-    public void feedIdle() {
-        this.feedWheel.setPower(FEED_IDLE);
+    public void kick() {
+        this.feedWheel.setPower(0.6);
     }
+    public void servoOpen() {
+        this.servo.setPosition(0.5);}
+
+        public void servoClose() {
+            this.servo.setPosition(0.35);}
 }

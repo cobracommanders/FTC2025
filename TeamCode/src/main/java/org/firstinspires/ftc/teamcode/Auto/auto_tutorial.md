@@ -106,8 +106,7 @@ Shooter.SPEED_HIGH         // 2500 RPM
 ```java
 void setVelocity(double rpms)  // Set target velocity
 boolean isReady()               // True when at target ±4%
-void feed()                     // Run feed wheel (shoot)
-void feedIdle()                 // Run feed wheel in reverse slowly to keep the balls in
+void feed()                     // Run feed wheel (shoot) 
 void feedStop()                 // Stop feed wheel
 void stop()                     // Stop shooter motors
 ```

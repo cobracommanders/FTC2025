@@ -43,7 +43,7 @@ public class MechanumAutonomousShootRED extends LinearOpMode {
         this.drivetrain.stop();
         resetRuntime();
         while (opModeIsActive() && getRuntime() < 1.0) {
-            this.drivetrain.drive(0, -0.35, 0, 1.0);
+            this.drivetrain.drive(0, 0.35, 0, 1.0);
         }
         this.drivetrain.stop();
 
@@ -96,14 +96,14 @@ public class MechanumAutonomousShootRED extends LinearOpMode {
 
         resetRuntime();
 
-        while (opModeIsActive() && getRuntime() < 1.0) {  // turn for 1.5 seconds at 30% speed in CCW direction
-            this.drivetrain.drive(0, 0, 0.5, 1.0);
+        while (opModeIsActive() && getRuntime() < 2.0) {  // turn for 1.5 seconds at 30% speed in CCW direction
+            this.drivetrain.drive(0, 0, -0.5, 1.0);
         }
         this.drivetrain.stop();
 
         resetRuntime();
-        while (opModeIsActive() && getRuntime() < 3.0) {
-            this.drivetrain.drive(0, 0.35, 0, 1.0);
+        while (opModeIsActive() && getRuntime() < 2.0) {
+            this.drivetrain.drive(0, -0.35, 0, 1.0);
         }
         this.drivetrain.stop();
 
