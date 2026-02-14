@@ -26,7 +26,7 @@ public class TurnPDTesting extends LinearOpMode {
         resetRuntime();  // at Auto start, reset the stopwatch
 
         while(opModeIsActive()) {
-            drivetrain.turnToHeadingPID(90, 0.7, 5);
+            drivetrain.turnToHeadingPIDF(90, 0.7, 5);
         }
 
         drivetrain.stop();
