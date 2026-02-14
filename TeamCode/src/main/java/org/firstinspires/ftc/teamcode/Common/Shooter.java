@@ -29,7 +29,7 @@ public class Shooter {
 
     public DcMotorEx leftMotor;
     public DcMotorEx rightMotor;
-    private DcMotor feedWheel;
+
     private Servo servo;
     private double targetVelocity;
     public final boolean enableAutoShoot = false;
@@ -42,11 +42,9 @@ public class Shooter {
         this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.feedWheel = hardwareMap.dcMotor.get(HardwareConfig.FEED_WHEEL_MOTOR);
 
         this.leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         this.rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        this.feedWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(
                 kP, kI, kD, kF
@@ -56,7 +54,7 @@ public class Shooter {
                 pidfCoefficients.d, pidfCoefficients.f);
         this.rightMotor.setVelocityPIDFCoefficients(pidfCoefficients.p, pidfCoefficients.i,
                 pidfCoefficients.d, pidfCoefficients.f);
-        this.feedWheel.setPower(0);
+
     }
 
     public void setSpeed(double speed) {
@@ -98,24 +96,11 @@ public class Shooter {
         this.rightMotor.setPower(0);
     }
 
-    public void feed() {
-        this.feedWheel.setPower(FEED_SPEED);
-    }
 
-    public void feedReverse() {
-        this.feedWheel.setPower(FEED_SPEED_REVERSE);
-    }
 
-    public void feedStop() {
-        this.feedWheel.setPower(0);
-    }
-
-    public void kick() {
-        this.feedWheel.setPower(0.6);
-    }
     public void servoOpen() {
-        this.servo.setPosition(0.5);}
+        this.servo.setPosition(1);}
 
         public void servoClose() {
-            this.servo.setPosition(0.35);}
+            this.servo.setPosition(-1);}
 }

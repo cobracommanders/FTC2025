@@ -46,34 +46,34 @@ public void runOpMode() throws InterruptedException {
     }
     this.drivetrain.stop();
 
-    this.shooter.feedIdle();
+    
     this.intake.drive(0.3);
     this.shooter.setVelocity(2075);
 
     waitForShooterReady();
-    this.shooter.feedReverse();
+
     sleep(50);
     this.intake.drive(0.6);
     sleep(200);
     this.intake.stop();
     sleep(300);
-    this.shooter.feedIdle();
+    
 
 
     sleep(1000);
     waitForShooterReady();
-    this.shooter.feedReverse();
+//    this.shooter.feedReverse();
     sleep(50);
     this.intake.drive(0.6);
     sleep(400);
     this.intake.stop();
     sleep(300);
-    this.shooter.feedIdle();
+    
 
 
     sleep(1000);
     waitForShooterReady();
-    this.shooter.feedReverse();
+//    this.shooter.feedReverse();
     sleep(50);
     this.intake.drive(1.0);
     sleep(250);
@@ -81,11 +81,11 @@ public void runOpMode() throws InterruptedException {
     sleep(2000);
     this.intake.stop();
     sleep(300);
-    this.shooter.feedIdle();
+    
 
     this.shooter.stop();
 
-    this.shooter.feedIdle();
+    
 
     resetRuntime();
     while (opModeIsActive() && getRuntime() < 1.0) {
@@ -116,7 +116,7 @@ public void runOpMode() throws InterruptedException {
     this.drivetrain.stop();
     this.intake.stop();
     this.shooter.stop();
-    this.shooter.feedStop();
+//    this.shooter.feedStop();
 }
 }
 // backwards towards the driver 23 inches, 48 inches left, then turn 180 degrees, 34 inches forward intake same time, go back 34 inches, turn 180 degrees, 48 inches right, forward 23 inches, shoot, backwards 23 inches, left 80 1/2 inches, forwards 34 inches while intaking, backwards 34 inches, right 80 1/2 inches, forwards 23 inches. shoot, backwards 23 inches, left 119 inches, forward 34 inches while intaking, backwards 34 inches, right 119 inches, forward 23 inches, shoot, backwards, stop auto. */

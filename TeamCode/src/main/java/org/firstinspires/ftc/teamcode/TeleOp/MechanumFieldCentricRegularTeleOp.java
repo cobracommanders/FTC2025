@@ -6,23 +6,22 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Common.Intake;
 import org.firstinspires.ftc.teamcode.Common.MechanumDrive;
 import org.firstinspires.ftc.teamcode.Common.Shooter;
-
+import org.firstinspires.ftc.teamcode.Common.Kickstand;
 @TeleOp
 public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
 
     private MechanumDrive drivetrain;
-    boolean kickstandoff = true;
     private Shooter shooter;
     private Intake intake;
 //    private Shooter feedWheel;
-
+private Kickstand kickstand;
 
     @Override
     public void runOpMode() throws InterruptedException {
         this.drivetrain = new MechanumDrive(hardwareMap);
         this.shooter = new Shooter(hardwareMap);
         this.intake = new Intake(hardwareMap);
-
+this.kickstand = new Kickstand(hardwareMap);
         this.drivetrain.resetHeadingIfNeeded();
 
         waitForStart();
@@ -76,13 +75,13 @@ public class MechanumFieldCentricRegularTeleOp extends LinearOpMode {
             } else if (gamepad1.b) {
                 shooter.servoClose();
             }
-            if (gamepad1.dpad_left); {
-                kickstandoff = !kickstandoff;
+            if (gamepad1.dpad_down) {
+                kickstand.kick();
+            } else if (gamepad1.dpad_up) {
+                kickstand.unkick();
             }
-            if(kickstandoff){
-                shooter.feedStop();
-            } else {
-                shooter.kick();
+            else {
+                kickstand.kickStop();
             }
             this.telemetry.addData("auto_shoot_enabled:", this.shooter.enableAutoShoot);
             this.telemetry.addData("left_velocity:", this.shooter.getLeftVelocity());

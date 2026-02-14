@@ -5,8 +5,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-
+import static java.lang.Math.signum;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MechanumDrive {
 
@@ -22,6 +24,10 @@ public class MechanumDrive {
 
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private IMU imu;
+    private boolean lastTurnTimedOut;
+//    private List<DriveData> lastDriveHistory;
+    private boolean lastDriveTimedOut;
+
 
     public MechanumDrive(HardwareMap hardwareMap) {
         this.frontLeft = hardwareMap.dcMotor.get(HardwareConfig.FRONT_LEFT_DRIVE_MOTOR);
@@ -234,5 +240,88 @@ public class MechanumDrive {
         this.backRight.setTargetPosition(-pulses);
         this.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.setPower(Math.abs(power));
+    }
+    public void turnToHeadingPIDF(double targetAngle, double kP, double kD, double kI, double powerMax, double timeout_sec) {
+        // measured good values (max speed 0.8): kp=0.4, kd=0.05, ki=0; kp=0.4, kd=0.1, ki=0;
+        double targetRadians = Math.toRadians(targetAngle);
+        double tolerance = Math.toRadians(1);
+        double kF = 0.09;
+        double maxIntegral = 10;
+
+        double previousError = 0;
+        double integral = 0;
+        long startTime = System.currentTimeMillis();
+        long previousTime = startTime;
+        long timeoutMs = (long)(timeout_sec * 1000);
+
+        // Initialize logging
+//        this.lastTurnHistory = new ArrayList<>();
+        this.lastTurnTimedOut = false;
+//        FtcDashboard dashboard = FtcDashboard.getInstance();
+
+        while (true) {
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - startTime > timeoutMs) {
+                this.lastTurnTimedOut = true;
+                break;
+            }
+
+            double currentHeading = getHeading();
+            double error = targetRadians - currentHeading;
+
+            // Normalize error to [-PI, PI]
+            while (error > Math.PI) error -= 2 * Math.PI;
+            while (error < -Math.PI) error += 2 * Math.PI;
+
+            if (Math.abs(error) < tolerance) {
+                this.stop();
+                break;
+            }
+
+            // Calculate dt in seconds for correct unit scaling
+            double dt = (currentTime - previousTime) / 1000.0;
+            if (dt < 0.001) {
+                dt = 0.02;  // Default to 20ms on first iteration
+            }
+
+            double p = kP * error;
+            double d = kD * (error - previousError) / dt;
+            integral += kI * error;
+            integral = Math.max(-maxIntegral, Math.min(maxIntegral, integral));
+            double f = signum(error) * kF;
+
+            double turnPower = p + integral + d + f;
+            turnPower = Math.max(-powerMax, Math.min(powerMax, turnPower));
+
+            // Log data for post-run analysis
+            long elapsed = currentTime - startTime;
+//            TurnData data = new TurnData(elapsed, error, p, integral, d, f, turnPower);
+//            this.lastTurnHistory.add(data);
+
+            // Send to FTC Dashboard for real-time graphing
+//            TelemetryPacket packet = new TelemetryPacket();
+//            packet.put("turn/error", Math.toDegrees(error));
+//            packet.put("turn/p", p);
+//            packet.put("turn/i", integral);
+//            packet.put("turn/d", d);
+//            packet.put("turn/f", f);
+//            packet.put("turn/output", turnPower);
+//            packet.put("heading", Math.toDegrees(currentHeading));
+//            dashboard.sendTelemetryPacket(packet);
+
+            this.drive(0, 0, -turnPower, 0.0);
+
+            previousError = error;
+            previousTime = currentTime;
+
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+
+        this.stop();
     }
 }

@@ -154,7 +154,7 @@ this.intake.stop():;
 
 ### Shooter spin-up with wait
 ```java
-this.shooter.feedIdle();
+
 this.shooter.setVelocity(Shooter.SPEED_MEDIUM_LOW);  // see Shooter.java for what RPMs this value corresponds to
 
 double startTime = getRuntime();
@@ -167,7 +167,7 @@ while (opModeIsActive() && !this.shooter.isReady() && (getRuntime() - startTime)
 
 ```java
 // Spin up and wait
-this.shooter.feedIdle();
+
 this.shooter.setVelocity(Shooter.SPEED_MEDIUM_LOW);
 
 while (opModeIsActive() && !this.shooter.isReady()) {
@@ -177,7 +177,7 @@ while (opModeIsActive() && !this.shooter.isReady()) {
 // Fire one shot
 this.shooter.feed();
 sleep(300);
-this.shooter.feedIdle();
+
 ```
 
 ## Notes

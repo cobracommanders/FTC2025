@@ -9,7 +9,7 @@ public class HardwareConfig {
     public static final String FEED_SERVO = "feedServo";
     public static final String SHOOTER_LEFT_MOTOR = "shooterLeftMotor";
     public static final String SHOOTER_RIGHT_MOTOR = "shooterRightMotor";
-    public static final String FEED_WHEEL_MOTOR = "feedWheel";
+    public static final String KICKSTAND_MOTOR = "kickstandMotor";
     public static final String INDEX_MOTOR = "indexMotor";
 
     public static final String IMU = "imu";

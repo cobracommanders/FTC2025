@@ -84,7 +84,7 @@ public class EncoderTest extends LinearOpMode {
         this.drivetrain.stop();
         this.intake.stop();
         this.shooter.stop();
-        this.shooter.feedStop();
+//        this.shooter.feedStop();
     }
 }
 

@@ -47,34 +47,34 @@ public class MechanumAutonomousShootRED extends LinearOpMode {
         }
         this.drivetrain.stop();
 
-        this.shooter.feedIdle();
+        
         this.intake.drive(0.3);
         this.shooter.setVelocity(2075);
 
         waitForShooterReady();
-        this.shooter.feedReverse();
+//        this.shooter.feedReverse();
         sleep(50);
         this.intake.drive(0.6);
         sleep(200);
         this.intake.stop();
         sleep(300);
-        this.shooter.feedIdle();
+        
 
 
         sleep(1000);
         waitForShooterReady();
-        this.shooter.feedReverse();
+//        this.shooter.feedReverse();
         sleep(50);
         this.intake.drive(0.6);
         sleep(400);
         this.intake.stop();
         sleep(300);
-        this.shooter.feedIdle();
+        
 
 
         sleep(1000);
         waitForShooterReady();
-        this.shooter.feedReverse();
+//        this.shooter.feedReverse();
         sleep(50);
         this.intake.drive(1.0);
         sleep(250);
@@ -82,11 +82,11 @@ public class MechanumAutonomousShootRED extends LinearOpMode {
         sleep(2000);
         this.intake.stop();
         sleep(300);
-        this.shooter.feedIdle();
+        
 
         this.shooter.stop();
 
-        this.shooter.feedIdle();
+        
 
         resetRuntime();
         while (opModeIsActive() && getRuntime() < 1.0) {
@@ -112,6 +112,6 @@ public class MechanumAutonomousShootRED extends LinearOpMode {
         this.drivetrain.stop();
         this.intake.stop();
         this.shooter.stop();
-        this.shooter.feedStop();
+//        this.shooter.feedStop();
     }
 }
