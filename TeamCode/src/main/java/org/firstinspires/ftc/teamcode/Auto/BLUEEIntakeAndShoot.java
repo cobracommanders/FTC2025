@@ -36,68 +36,62 @@ public void runOpMode() throws InterruptedException {
 
     resetRuntime();  // at Auto start, reset the stopwatch
 
-    while (opModeIsActive() && getRuntime() < 1.0) {  // turn for 1.5 seconds at 30% speed in CCW direction
-        this.drivetrain.drive(0, 0, 0.5, 1.0);
-    }
+    this.shooter.servoClose();
+
     this.drivetrain.stop();
-    resetRuntime();
-    while (opModeIsActive() && getRuntime() < 1.0) {
-        this.drivetrain.drive(0, -0.35, 0, 1.0);
+    this.drivetrain.turnToHeadingPIDF(-45, 0.4, 0.1, 0, .7, 5); //Turns to face goal.
+    this.drivetrain.stop();
+
+    this.drivetrain.driveToPosition(-6, 0.5); // Drives to the front of the goal.
+    while(opModeIsActive() && this.drivetrain.isBusy()){
+        telemetry.addData("Status", "Moving Backward 6");
+        telemetry.update();
     }
     this.drivetrain.stop();
 
-    
-    this.intake.drive(0.3);
+
     this.shooter.setVelocity(2075);
+    this.intake.drive(0.3); // Gets ready to shoot.
+    sleep(300);
+    this.intake.stop();
 
     waitForShooterReady();
+////        this.shooter.feedReverse();
 
-    sleep(50);
-    this.intake.drive(0.6);
+    this.shooter.servoOpen();
+    sleep(500);
+    this.intake.drive(0.6); // Shoots ball.
     sleep(200);
+    this.shooter.servoClose();
     this.intake.stop();
-    sleep(300);
-    
 
 
-    sleep(1000);
-    waitForShooterReady();
-//    this.shooter.feedReverse();
-    sleep(50);
-    this.intake.drive(0.6);
-    sleep(400);
+
+    this.shooter.servoOpen();
+    sleep(500);
+    this.intake.drive(0.6); // Shoots another ball.
+    sleep(200);
+    this.shooter.servoClose();
     this.intake.stop();
-    sleep(300);
-    
 
 
-    sleep(1000);
-    waitForShooterReady();
-//    this.shooter.feedReverse();
-    sleep(50);
-    this.intake.drive(1.0);
-    sleep(250);
-    this.intake.drive(0.6);
-    sleep(2000);
+
+    this.shooter.servoOpen();
+    sleep(500);
+    this.intake.drive(0.6); // Shoots yet another ball.
+    sleep(200);
+    this.shooter.servoClose();
     this.intake.stop();
-    sleep(300);
-    
 
     this.shooter.stop();
 
-    
-
-    resetRuntime();
-    while (opModeIsActive() && getRuntime() < 1.0) {
-        this.drivetrain.drive(0, 0.35, 0, 1.0);
+    this.drivetrain.driveToPosition(6, 0.5);
+    while(opModeIsActive() && this.drivetrain.isBusy()){ // Drives away from the goal 6 inches.
+        telemetry.addData("Status", "Moving Forward 6");
+        telemetry.update();
     }
     this.drivetrain.stop();
-
-    resetRuntime();
-
-    while (opModeIsActive() && getRuntime() < 1.0) {  // turn for 1.5 seconds at 30% speed in CCW direction
-        this.drivetrain.drive(0, 0, -0.5, 1.0);
-    }
+    this.drivetrain.turnToHeadingPIDF(45, 0.4, 0.1, 0, .7, 5);
     this.drivetrain.stop();
 
     resetRuntime();
