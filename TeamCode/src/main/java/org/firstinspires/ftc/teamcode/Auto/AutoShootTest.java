@@ -22,13 +22,12 @@ public class AutoShootTest extends LinearOpMode {
         this.drivetrain = new MechanumDrive(hardwareMap);
         this.shooter = new Shooter(hardwareMap);
         this.intake = new Intake(hardwareMap);
-        this.autoShooter = new AutoShoot(this.intake, this.shooter,Shooter.SPEED_MEDIUM_HIGH);
+        this.autoShooter = new AutoShoot(this, this.intake, this.shooter, Shooter.SPEED_MEDIUM_HIGH);
 
         waitForStart();
         resetRuntime();  // at Auto start, reset the stopwatch
 
-        this.shooter.idle();
-        this.autoShooter.autoShoot(3);
+        this.autoShooter.run(3);
 
     }
 }

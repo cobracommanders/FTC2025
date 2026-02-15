@@ -9,11 +9,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Shooter {
 
     public static final double ENCODER_COUNTER_PER_REV = 28.0;
-
-    public static final double SPEED_LOW = 1200;
-    public static final double SPEED_MEDIUM_LOW = 1300;
-    public static final double SPEED_MEDIUM_HIGH = 1400;
-    public static final double SPEED_HIGH = 1500;
+    public static final double SPEED_IDLE = 1000;
+    public static final double SPEED_LOW = -300;
+    public static final double SPEED_MEDIUM_LOW = 1500;
+    public static final double SPEED_MEDIUM_HIGH = 1700; // closer to 1760 w/out tuning
+    public static final double SPEED_HIGH = 1800;
     public static final double SPEED_MAX = 1.0;
     public static final double FEED_SPEED = -1.0;
     public static final double FEED_SPEED_REVERSE = 1.0;
@@ -99,7 +99,7 @@ public class Shooter {
     }
 
     public void idle() {
-        this.setVelocity(SPEED_LOW);
+        this.setVelocity(SPEED_IDLE);
     }
 
     public void servoOpen() {
