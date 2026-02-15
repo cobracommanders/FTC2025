@@ -21,8 +21,9 @@ private Kickstand kickstand;
         this.drivetrain = new MechanumDrive(hardwareMap);
         this.shooter = new Shooter(hardwareMap);
         this.intake = new Intake(hardwareMap);
-this.kickstand = new Kickstand(hardwareMap);
+        this.kickstand = new Kickstand(hardwareMap);
         this.drivetrain.resetHeadingIfNeeded();
+
 
         waitForStart();
 
@@ -56,7 +57,7 @@ this.kickstand = new Kickstand(hardwareMap);
             } else if (gamepad2.x) {
                 this.shooter.setVelocity(Shooter.SPEED_LOW);
             } else {
-                this.shooter.stop();
+                this.shooter.idle();
             }
 
             // Indexer button controls

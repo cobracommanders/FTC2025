@@ -10,21 +10,23 @@ public class Shooter {
 
     public static final double ENCODER_COUNTER_PER_REV = 28.0;
 
-    public static final double SPEED_LOW = 1850;
-    public static final double SPEED_MEDIUM_LOW = 2000;
-    public static final double SPEED_MEDIUM_HIGH = 2250;
-    public static final double SPEED_HIGH = 2500;
+    public static final double SPEED_LOW = 1200;
+    public static final double SPEED_MEDIUM_LOW = 1300;
+    public static final double SPEED_MEDIUM_HIGH = 1400;
+    public static final double SPEED_HIGH = 1500;
     public static final double SPEED_MAX = 1.0;
     public static final double FEED_SPEED = -1.0;
     public static final double FEED_SPEED_REVERSE = 1.0;
     public static final double FEED_IDLE = -0.2;
     public static final double COUNTS_TO_RPMS = 60 / Shooter.ENCODER_COUNTER_PER_REV;
-    public static final double kP = 5.0;
+    public static final double kP = 5.0;  // was 5
     public static final double kI = 0.05;
     public static final double kD = 0.0;
     public static final double kF = 12.5;
-    public static final double READY_THRESH_UPPER = 1.02;
-    public static final double READY_THRESH_LOWER = 0.98;
+    public static final double READY_THRESH_UPPER = 1.05;
+    public static final double READY_THRESH_LOWER = 0.95;
+//        public static final double READY_THRESH_UPPER = 1.4;
+//    public static final double READY_THRESH_LOWER = 0.7;
 
 
     public DcMotorEx leftMotor;
@@ -54,7 +56,7 @@ public class Shooter {
                 pidfCoefficients.d, pidfCoefficients.f);
         this.rightMotor.setVelocityPIDFCoefficients(pidfCoefficients.p, pidfCoefficients.i,
                 pidfCoefficients.d, pidfCoefficients.f);
-
+        this.servoClose();
     }
 
     public void setSpeed(double speed) {
@@ -73,11 +75,11 @@ public class Shooter {
     }
 
     public double getRightVelocity() {
-        return this.rightMotor.getVelocity()*COUNTS_TO_RPMS;
+        return this.rightMotor.getVelocity() * COUNTS_TO_RPMS;
     }
 
     public double getLeftVelocity() {
-        return -1* this.leftMotor.getVelocity()*COUNTS_TO_RPMS;
+        return -1 * this.leftMotor.getVelocity() * COUNTS_TO_RPMS;
     }
 
     public double getVelocity() {
@@ -96,11 +98,15 @@ public class Shooter {
         this.rightMotor.setPower(0);
     }
 
-
+    public void idle() {
+        this.setVelocity(SPEED_LOW);
+    }
 
     public void servoOpen() {
-        this.servo.setPosition(1);}
+        this.servo.setPosition(0.8);
+    }
 
-        public void servoClose() {
-            this.servo.setPosition(-1);}
+    public void servoClose() {
+        this.servo.setPosition(-1);
+    }
 }
