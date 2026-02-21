@@ -37,10 +37,11 @@ public void runOpMode() throws InterruptedException {
     resetRuntime();  // at Auto start, reset the stopwatch
 
     this.shooter.servoClose();
-
+    this.shooter.setVelocity(1850);
     this.drivetrain.stop();
-    this.drivetrain.turnToHeadingPIDF(-45, 0.4, 0.1, 0, .7, 5); //Turns to face goal.
+    this.drivetrain.turnToHeadingPIDF(45, 0.4, 0.1, 0, .7, 5); //Turns to face goal.
     this.drivetrain.stop();
+    this.shooter.servoOpen();
 
     this.drivetrain.driveToPosition(-6, 0.5); // Drives to the front of the goal.
     while(opModeIsActive() && this.drivetrain.isBusy()){
@@ -49,63 +50,58 @@ public void runOpMode() throws InterruptedException {
     }
     this.drivetrain.stop();
 
-
-    this.shooter.setVelocity(2075);
-    this.intake.drive(0.3); // Gets ready to shoot.
-    sleep(300);
+    //first artifact get shot by this
+    sleep(2000);
+    this.intake.drive(0.9); // Gets ready to shoot. (.3 -> .9)
+    sleep(500);
     this.intake.stop();
 
-    waitForShooterReady();
+    //waitForShooterReady(); this made the robot pause and it would not progress past this
 ////        this.shooter.feedReverse();
 
-    this.shooter.servoOpen();
-    sleep(500);
-    this.intake.drive(0.6); // Shoots ball.
-    sleep(200);
-    this.shooter.servoClose();
-    this.intake.stop();
+    //second artifact gets shot
+    // this.shooter.servo.setPosition(0.5); //opens the gate probably
+   sleep(1000);
+   this.intake.drive(0.9); //maybe it needs more power (went from 0.6 -> 1.0)
+   sleep(2000); //doubled
+   this.intake.stop();
 
-
-
-    this.shooter.servoOpen();
-    sleep(500);
+   //third artifact shoots
+    //this.shooter.servoOpen();
+    sleep(1000);
     this.intake.drive(0.6); // Shoots another ball.
-    sleep(200);
-    this.shooter.servoClose();
-    this.intake.stop();
-
-
-
-    this.shooter.servoOpen();
-    sleep(500);
-    this.intake.drive(0.6); // Shoots yet another ball.
     sleep(200);
     this.shooter.servoClose();
     this.intake.stop();
 
     this.shooter.stop();
 
-    this.drivetrain.driveToPosition(6, 0.5);
-    while(opModeIsActive() && this.drivetrain.isBusy()){ // Drives away from the goal 6 inches.
-        telemetry.addData("Status", "Moving Forward 6");
+    this.drivetrain.driveToPosition(3, 0.5);
+    while(opModeIsActive() && this.drivetrain.isBusy()){ // Drives away from the goal 3 inches.
+        telemetry.addData("Status", "Moving Forward 3");
         telemetry.update();
     }
     this.drivetrain.stop();
     this.drivetrain.turnToHeadingPIDF(45, 0.4, 0.1, 0, .7, 5);
     this.drivetrain.stop();
 
-    resetRuntime();
-    while (opModeIsActive() && getRuntime() < 3.0) {
-        this.drivetrain.drive(0, 0.35, 0, 1.0);
-    }
-    this.drivetrain.stop();
+    //resetRuntime();
+   // while (opModeIsActive() && getRuntime() < 3.0) {
+    //    this.drivetrain.drive(0, 0.35, 0, 1.0);
+    //}
+    //this.drivetrain.stop();
 // If you want to make it rotate, you would replace "driveToPosition" to "turn", and if you want to change it to strafe, you would replace it with "strafe[direction]
-    this.drivetrain.driveToPosition(-23, 0.6);
+    this.drivetrain.driveToPosition(23, 0.6);
     while(opModeIsActive() && this.drivetrain.isBusy()){
         telemetry.addData("Status", "Moving Forward");
         telemetry.update();
     }
     this.drivetrain.stop();
+    this.drivetrain.strafeLeft(48,0.6);
+    while(opModeIsActive() && this.drivetrain.isBusy()) {
+        telemetry.addData("Status", "Strafe Left");
+        telemetry.update();
+    }
     // Stop everything when auto ends
     this.drivetrain.stop();
     this.intake.stop();

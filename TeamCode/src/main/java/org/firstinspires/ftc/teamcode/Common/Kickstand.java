@@ -19,7 +19,7 @@ public void unkick() {
         this.kickstand.setPower(-0.2);
 }
     public void kick() {
-        this.kickstand.setPower(0.6);
+        this.kickstand.setPower(0.8);
     }
 
 }

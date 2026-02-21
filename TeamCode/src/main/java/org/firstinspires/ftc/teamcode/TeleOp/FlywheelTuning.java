@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 public class FlywheelTuning extends OpMode {
 public DcMotorEx leftMotor;
 public DcMotorEx rightMotor;
-public double lowVelocity = 900;
-public double highVelocity = 1500;
+public double lowVelocity = 2000;
+public double highVelocity = 3000;
     double curTargetVelocity = highVelocity;
 double F = 0;
 double P = 0;
@@ -22,7 +22,7 @@ int stepIndex = 1;
     rightMotor = hardwareMap.get(DcMotorEx.class, "shooterRightMotor");
     leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    rightMotor.setDirection(DcMotor.Direction.REVERSE);
+    leftMotor.setDirection(DcMotor.Direction.REVERSE);
     PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
     leftMotor.setVelocityPIDFCoefficients(pidfCoefficients.p, pidfCoefficients.i,
             pidfCoefficients.d, pidfCoefficients.f);
@@ -65,15 +65,16 @@ leftMotor.setVelocity(curTargetVelocity);
 rightMotor.setVelocity(curTargetVelocity);
 
 double curVelocityLeft = leftMotor.getVelocity();
-//double curVelocityRight = rightMotor.getVelocity();
+double curVelocityRight = rightMotor.getVelocity();
 double error = curTargetVelocity - curVelocityLeft;
 
 telemetry.addData("Target Velocity", curTargetVelocity);
-telemetry.addData("Current Velocity", "%.2f", curVelocityLeft);
+telemetry.addData("Current Velocity Left", "%.2f", curVelocityLeft);
+telemetry.addData("Current Velocity right", "%.2f", curVelocityRight);
 telemetry.addData("Error", "%.2f", error);
 telemetry.addLine("------------------------------");
-telemetry.addData("Tuning P", "%.4f (D-Pad U/D)");
-telemetry.addData("Tuning F", "%.4f (D-Pad L/R)");
+telemetry.addData("Tuning P", "%.4f (D-Pad U/D)",pidfCoefficients.p);
+telemetry.addData("Tuning F", "%.4f (D-Pad L/R)",pidfCoefficients.f);
 telemetry.addData("Step Size", "%.4f (B Button)", stepSizes[stepIndex]);
     }
 }

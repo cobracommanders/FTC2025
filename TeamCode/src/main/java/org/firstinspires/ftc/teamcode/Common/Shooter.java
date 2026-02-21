@@ -102,5 +102,5 @@ public class Shooter {
         this.servo.setPosition(1);}
 
         public void servoClose() {
-            this.servo.setPosition(-1);}
+            this.servo.setPosition(0);}
 }
